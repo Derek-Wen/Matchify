@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 # Spotify API credentials
 client_id = os.getenv('SPOTIFY_CLIENT_ID', '').strip()
 client_secret = os.getenv('SPOTIFY_CLIENT_SECRET', '').strip()
-redirect_uri = os.getenv('REDIRECT_URI', '').strip()
+redirect_uri = os.getenv('REDIRECT_URI', 'http://127.0.0.1:5000/callback').strip()
 
 # User Model
 class User(db.Model, UserMixin):
@@ -384,9 +384,10 @@ def compare(user_id):
             top_genres=top_genres
         )
     except Exception as e:
-        logger.error(f"Error during comparison between {current_user.username} and user_id {user_id}: {e}")
+        logger.exception(f"Error during comparison between {current_user.username} and user_id {user_id}: {e}")
         flash("An error occurred while comparing profiles.")
         return redirect(url_for('users'))
+
 
 @app.route('/update_privacy', methods=['GET', 'POST'])
 @login_required

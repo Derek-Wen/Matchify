@@ -1,0 +1,53 @@
+/* static/css/custom.css */
+
+/* Adjust body margin to account for fixed navbar */
+body {
+    padding-top: 70px;
+}
+
+/* Style for the navbar brand */
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Style for the footer */
+.footer {
+    background-color: #f8f9fa;
+}
+
+.footer .text-muted {
+    margin: 0;
+}
+
+/* Adjust card image */
+.card-img-top {
+    width: 100%;
+    height: auto;
+}
+
+/* Ensure cards have equal height */
+.card {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-body {
+    flex-grow: 1;
+}
+
+/* Optional: Style for headings */
+h1 {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* Optional: Adjust button styles */
+.btn-primary {
+    background-color: #1db954;
+    border-color: #1db954;
+}
+
+.btn-primary:hover {
+    background-color: #17a44f;
+    border-color: #17a44f;
+}

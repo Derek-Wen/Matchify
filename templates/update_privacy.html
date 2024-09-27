@@ -1,0 +1,17 @@
+<!-- templates/update_privacy.html -->
+{% extends "base.html" %}
+
+{% block title %}Privacy Settings - Spotify Profile Comparator{% endblock %}
+
+{% block content %}
+<h1>Privacy Settings</h1>
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.share_data.label }}
+        {{ form.share_data(class="form-check-input") }}
+    </div>
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+<p><a href="{{ url_for('dashboard') }}" class="btn btn-link">Back to Dashboard</a></p>
+{% endblock %}

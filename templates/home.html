@@ -1,0 +1,17 @@
+<!-- templates/home.html -->
+{% extends "base.html" %}
+
+{% block title %}Home - Spotify Profile Comparator{% endblock %}
+
+{% block content %}
+<div class="jumbotron text-center">
+    <h1 class="display-4">Welcome to the Spotify Profile Comparator</h1>
+    {% if current_user.is_authenticated %}
+        <p class="lead">Hello, {{ current_user.username }}!</p>
+        <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard') }}">Go to Dashboard</a>
+    {% else %}
+        <p class="lead">Compare your Spotify profile with others!</p>
+        <a class="btn btn-success btn-lg" href="{{ url_for('login') }}">Login with Spotify</a>
+    {% endif %}
+</div>
+{% endblock %}

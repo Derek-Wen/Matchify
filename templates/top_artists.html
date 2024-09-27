@@ -1,0 +1,36 @@
+<!-- templates/top_artists.html -->
+{% extends "base.html" %}
+
+{% block title %}Your Top Artists - {{ time_range_label }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Your Top Artists - {{ time_range_label }}</h1>
+<div class="row">
+    {% for artist in artists %}
+        <div class="col-md-4 d-flex align-items-stretch">
+            <div class="card mb-4">
+                {% if artist.image_url %}
+                    <img
+                      src="{{ artist.image_url }}"
+                      class="card-img-top"
+                      alt="{{ artist.name }}"
+                    >
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ artist.name }}</h5>
+                    <p class="card-text">
+                        <strong>Genres:</strong> {{ artist.genres }}<br>
+                        <strong>Popularity:</strong> {{ artist.popularity }}<br>
+                        <strong>Followers:</strong> {{ "{:,}".format(artist.followers) }}
+                    </p>
+                    <a
+                      href="{{ artist.spotify_url }}"
+                      class="btn btn-primary"
+                      target="_blank"
+                    >Open in Spotify</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

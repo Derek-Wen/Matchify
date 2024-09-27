@@ -1,0 +1,58 @@
+<!-- templates/dashboard.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Spotify Profile Comparator{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Welcome, {{ user.username }}!</h1>
+{% if user.profile_image %}
+    <img src="{{ user.profile_image }}" alt="Profile Image" width="100" class="mb-3">
+{% endif %}
+
+<p>
+    <a href="{{ url_for('users') }}" class="btn btn-success">Compare with Other Users</a>
+    <a href="{{ url_for('update_privacy') }}" class="btn btn-secondary">Privacy Settings</a>
+</p>
+
+<h2>Your Top Artists</h2>
+{% if top_artists %}
+<div class="row">
+    {% for artist in top_artists %}
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            {% if artist['images'] %}
+            <img src="{{ artist['images'][0]['url'] }}" class="card-img-top" alt="{{ artist['name'] }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ artist['name'] }}</h5>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>You have no top artists to display.</p>
+{% endif %}
+
+<h2>Your Top Tracks</h2>
+{% if top_tracks %}
+<div class="row">
+    {% for track in top_tracks %}
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            {% if track['album']['images'] %}
+            <img src="{{ track['album']['images'][0]['url'] }}" class="card-img-top" alt="{{ track['name'] }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ track['name'] }}</h5>
+                <p class="card-text">By {{ track['artists'][0]['name'] }}</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>You have no top tracks to display.</p>
+{% endif %}
+
+{% endblock %}

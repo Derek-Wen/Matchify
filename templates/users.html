@@ -1,0 +1,24 @@
+<!-- templates/users.html -->
+{% extends "base.html" %}
+
+{% block title %}Select User to Compare - Spotify Profile Comparator{% endblock %}
+
+{% block content %}
+<h1>Select a User to Compare With</h1>
+{% if users %}
+<ul class="list-group">
+    {% for user in users %}
+    <li class="list-group-item d-flex align-items-center">
+        {% if user.profile_image %}
+        <img src="{{ user.profile_image }}" alt="{{ user.username }}" width="50" class="mr-3">
+        {% endif %}
+        <span>{{ user.username }}</span>
+        <a href="{{ url_for('compare', user_id=user.id) }}" class="btn btn-primary ml-auto">Compare</a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No other users available for comparison.</p>
+{% endif %}
+<p><a href="{{ url_for('dashboard') }}" class="btn btn-link">Back to Dashboard</a></p>
+{% endblock %}

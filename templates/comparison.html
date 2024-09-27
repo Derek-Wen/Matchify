@@ -1,0 +1,96 @@
+<!-- templates/comparison.html -->
+{% extends "base.html" %}
+
+{% block title %}Comparison with {{ other_user.username }} - Spotify Profile Comparator{% endblock %}
+
+{% block content %}
+<h1>Comparison with {{ other_user.username }}</h1>
+
+<h2>Similarity Scores</h2>
+<ul>
+    <li>Artist Similarity: {{ artist_similarity|round(2) }}%</li>
+    <li>Track Similarity: {{ track_similarity|round(2) }}%</li>
+    <li>Audio Feature Similarity: {{ audio_similarity|round(2) }}%</li>
+</ul>
+
+<h2>Common Genres</h2>
+<canvas id="genreChart" width="400" height="200"></canvas>
+
+<h2>Common Artists</h2>
+{% if common_artists %}
+<div class="row">
+    {% for artist in common_artists %}
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            {% if artist['images'] %}
+            <img src="{{ artist['images'][0]['url'] }}" class="card-img-top" alt="{{ artist['name'] }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ artist['name'] }}</h5>
+                <a href="{{ artist['external_urls']['spotify'] }}" target="_blank" class="btn btn-sm btn-secondary">View on Spotify</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No common artists found.</p>
+{% endif %}
+
+<h2>Common Tracks</h2>
+{% if common_tracks %}
+<div class="row">
+    {% for track in common_tracks %}
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            {% if track['album']['images'] %}
+            <img src="{{ track['album']['images'][0]['url'] }}" class="card-img-top" alt="{{ track['name'] }}">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ track['name'] }}</h5>
+                <p class="card-text">By {{ track['artists'][0]['name'] }}</p>
+                <a href="{{ track['external_urls']['spotify'] }}" target="_blank" class="btn btn-sm btn-secondary">Listen on Spotify</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No common tracks found.</p>
+{% endif %}
+
+<p><a href="{{ url_for('users') }}" class="btn btn-link">Compare with another user</a></p>
+<p><a href="{{ url_for('dashboard') }}" class="btn btn-link">Back to Dashboard</a></p>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('genreChart').getContext('2d');
+    const genreChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ [genre[0] for genre in top_genres] | tojson }},
+            datasets: [{
+                label: 'Common Genres',
+                data: {{ [genre[1] for genre in top_genres] | tojson }},
+                backgroundColor: 'rgba(30, 215, 96, 0.6)',
+                borderColor: 'rgba(30, 215, 96, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        autoSkip: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

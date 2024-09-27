@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
     LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 )
-from flask_wtf import FlaskForm
+from wtforms import Form
 from wtforms import BooleanField, SubmitField
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
@@ -55,7 +55,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # Privacy Form
-class PrivacyForm(FlaskForm):
+class PrivacyForm(Form):
     share_data = BooleanField('Allow other users to compare with me')
     submit = SubmitField('Update')
 

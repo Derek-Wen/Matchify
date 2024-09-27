@@ -192,6 +192,7 @@ def callback():
     error = request.args.get('error')
     if error:
         flash(f"Error during authentication: {error}")
+        logger.error(f"Authentication error: {error}")
         return redirect(url_for('home'))
 
     # Exchange code for access token
@@ -213,6 +214,8 @@ def callback():
     response = requests.post(token_url, data=payload, headers=headers)
     response_data = response.json()
 
+    logger.info(f"Token exchange response: {response_data}")
+
     if 'access_token' in response_data:
         access_token = response_data['access_token']
         refresh_token = response_data.get('refresh_token')
@@ -225,6 +228,9 @@ def callback():
         # Fetch user's profile information
         user_profile_url = 'https://api.spotify.com/v1/me'
         profile_response = requests.get(user_profile_url, headers=headers)
+        logger.info(f"Profile fetch response status: {profile_response.status_code}")
+        logger.info(f"Profile fetch response data: {profile_response.text}")
+
         if profile_response.status_code != 200:
             logger.error(f"Failed to fetch user profile: {profile_response.status_code} {profile_response.text}")
             flash("Failed to fetch user profile from Spotify.")

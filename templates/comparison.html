@@ -16,9 +16,56 @@
 <h2>Common Genres</h2>
 <canvas id="genreChart" width="400" height="200"></canvas>
 
-<!-- Common Artists and Tracks Sections -->
+<div class="row mt-4">
+    <!-- Common Artists Section -->
+    <div class="col-md-6">
+        <h2>Common Artists</h2>
+        {% if common_artists %}
+            <div class="list-group">
+                {% for artist in common_artists %}
+                    <a href="{{ artist['external_urls']['spotify'] }}" target="_blank" class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ artist['name'] }}</h5>
+                        </div>
+                        {% if artist['images'] %}
+                            <img src="{{ artist['images'][0]['url'] }}" alt="{{ artist['name'] }}" class="img-thumbnail mb-2" style="max-width: 150px;">
+                        {% endif %}
+                        <p class="mb-1"><strong>Genres:</strong> {{ artist['genres'] | join(', ') }}</p>
+                        <small><strong>Popularity:</strong> {{ artist['popularity'] }}</small>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No common artists found.</p>
+        {% endif %}
+    </div>
 
-<p><a href="{{ url_for('users') }}" class="btn btn-link">Compare with another user</a></p>
+    <!-- Common Tracks Section -->
+    <div class="col-md-6">
+        <h2>Common Tracks</h2>
+        {% if common_tracks %}
+            <div class="list-group">
+                {% for track in common_tracks %}
+                    <a href="{{ track['external_urls']['spotify'] }}" target="_blank" class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ track['name'] }}</h5>
+                        </div>
+                        <p class="mb-1">By {{ track['artists'] | map(attribute='name') | join(', ') }}</p>
+                        {% if track['album']['images'] %}
+                            <img src="{{ track['album']['images'][0]['url'] }}" alt="{{ track['name'] }}" class="img-thumbnail mb-2" style="max-width: 150px;">
+                        {% endif %}
+                        <p class="mb-1"><strong>Album:</strong> {{ track['album']['name'] }}</p>
+                        <small><strong>Popularity:</strong> {{ track['popularity'] }}</small>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No common tracks found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<p class="mt-4"><a href="{{ url_for('users') }}" class="btn btn-link">Compare with another user</a></p>
 <p><a href="{{ url_for('dashboard') }}" class="btn btn-link">Back to Dashboard</a></p>
 {% endblock %}
 

@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="jumbotron text-center">
-    <h1 class="display-4">Welcome to the Spotify Profile Comparator</h1>
+    <h1 class="display-4">Welcome to Matchify</h1>
     {% if current_user.is_authenticated %}
         <p class="lead">Hello, {{ current_user.username }}!</p>
         <a class="btn btn-primary btn-lg" href="{{ url_for('dashboard') }}">Go to Dashboard</a>

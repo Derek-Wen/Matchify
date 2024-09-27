@@ -1,3 +1,5 @@
+# spotify_auth.py
+
 from flask import Flask, request, redirect, render_template, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -98,11 +100,11 @@ def refresh_access_token(user):
         logger.error(f"Failed to refresh access token for user {user.username}: {response_data}")
         return False
 
-def get_user_top_artists(user, time_range='medium_term'):
+def get_user_top_artists(user, time_range='medium_term', limit=50):
     headers = {
         'Authorization': f'Bearer {user.access_token}'
     }
-    params = {'limit': 20, 'time_range': time_range}
+    params = {'limit': limit, 'time_range': time_range}
     response = requests.get('https://api.spotify.com/v1/me/top/artists', headers=headers, params=params)
     if response.status_code == 200:
         return response.json()['items']
@@ -119,11 +121,11 @@ def get_user_top_artists(user, time_range='medium_term'):
         logger.error(f"Error fetching top artists for user {user.username}: {response.status_code} {response.text}")
         return []
 
-def get_user_top_tracks(user, time_range='medium_term'):
+def get_user_top_tracks(user, time_range='medium_term', limit=50):
     headers = {
         'Authorization': f'Bearer {user.access_token}'
     }
-    params = {'limit': 20, 'time_range': time_range}
+    params = {'limit': limit, 'time_range': time_range}
     response = requests.get('https://api.spotify.com/v1/me/top/tracks', headers=headers, params=params)
     if response.status_code == 200:
         return response.json()['items']
@@ -158,15 +160,11 @@ def get_tracks_audio_features(user, user_tracks):
                 response = requests.get('https://api.spotify.com/v1/audio-features', headers=headers, params=params)
                 if response.status_code == 200:
                     audio_features.extend(response.json()['audio_features'])
-                else:
-                    logger.error(f"Failed to fetch audio features after token refresh for user {user.username}: {response.status_code} {response.text}")
-                    flash(f"Failed to fetch audio features for user {user.username}.")
-            else:
-                logger.error(f"Failed to refresh token for user {user.username} when fetching audio features.")
-                flash(f"Failed to refresh access token for user {user.username}.")
+            flash(f"Failed to fetch audio features for user {user.username}.")
+            return []
         else:
             logger.error(f"Error fetching audio features for user {user.username}: {response.status_code} {response.text}")
-            flash(f"Error fetching audio features for user {user.username}.")
+            return []
     return audio_features
 
 # Routes
@@ -193,6 +191,11 @@ def callback():
     if error:
         flash(f"Error during authentication: {error}")
         logger.error(f"Authentication error: {error}")
+        return redirect(url_for('home'))
+
+    if not code:
+        flash("No authorization code provided.")
+        logger.error("No authorization code found in the callback.")
         return redirect(url_for('home'))
 
     # Exchange code for access token
@@ -315,54 +318,26 @@ def compare(user_id):
             flash('The user has disabled data sharing.')
             return redirect(url_for('users'))
 
-        # Fetch top tracks for both users
-        current_user_tracks = get_user_top_tracks(current_user)
-        other_user_tracks = get_user_top_tracks(other_user)
+        # Fetch top tracks and artists for both users
+        current_user_tracks = get_user_top_tracks(current_user, limit=50)
+        other_user_tracks = get_user_top_tracks(other_user, limit=50)
 
-        # Get audio features
-        current_user_audio_features = get_tracks_audio_features(current_user, current_user_tracks)
-        other_user_audio_features = get_tracks_audio_features(other_user, other_user_tracks)
+        current_user_artists = get_user_top_artists(current_user, limit=50)
+        other_user_artists = get_user_top_artists(other_user, limit=50)
 
-        # Define the features to consider
-        features = ['danceability', 'energy', 'valence', 'tempo', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
-
-        # Compute average features for each user
-        def average_features(audio_features_list):
-            feature_values = {feature: [] for feature in features}
-            for af in audio_features_list:
-                if af:  # Check if audio feature data is available
-                    for feature in features:
-                        feature_values[feature].append(af.get(feature, 0))
-            avg_features = [np.mean(feature_values[feature]) if feature_values[feature] else 0 for feature in features]
-            return np.array(avg_features).reshape(1, -1)
-
-        current_user_avg_features = average_features(current_user_audio_features)
-        other_user_avg_features = average_features(other_user_audio_features)
-
-        # Calculate cosine similarity
-        audio_similarity = cosine_similarity(current_user_avg_features, other_user_avg_features)[0][0] * 100
-
-        # Fetch top artists for both users
-        current_user_artists = get_user_top_artists(current_user)
-        other_user_artists = get_user_top_artists(other_user)
-
-        current_user_artist_ids = {artist['id'] for artist in current_user_artists}
-        other_user_artist_ids = {artist['id'] for artist in other_user_artists}
-
-        common_artist_ids = current_user_artist_ids & other_user_artist_ids
-
-        # Fetch artist details for common artists
-        common_artists = [artist for artist in current_user_artists if artist['id'] in common_artist_ids]
-
-        # Fetch top tracks for both users
+        # Find common tracks
         current_user_track_ids = {track['id'] for track in current_user_tracks}
         other_user_track_ids = {track['id'] for track in other_user_tracks}
-
         common_track_ids = current_user_track_ids & other_user_track_ids
-
         common_tracks = [track for track in current_user_tracks if track['id'] in common_track_ids]
 
-        # Calculate similarity scores
+        # Find common artists
+        current_user_artist_ids = {artist['id'] for artist in current_user_artists}
+        other_user_artist_ids = {artist['id'] for artist in other_user_artists}
+        common_artist_ids = current_user_artist_ids & other_user_artist_ids
+        common_artists = [artist for artist in current_user_artists if artist['id'] in common_artist_ids]
+
+        # Similarity scores
         artist_similarity = (len(common_artist_ids) / len(current_user_artist_ids)) * 100 if current_user_artist_ids else 0
         track_similarity = (len(common_track_ids) / len(current_user_track_ids)) * 100 if current_user_track_ids else 0
 
@@ -373,6 +348,10 @@ def compare(user_id):
         genre_counts = Counter(genres)
         top_genres = genre_counts.most_common(10)  # Top 10 genres
 
+        # Prepare data for Chart.js
+        genre_labels = [genre for genre, count in top_genres]
+        genre_data = [count for genre, count in top_genres]
+
         return render_template(
             'comparison.html',
             other_user=other_user,
@@ -380,14 +359,14 @@ def compare(user_id):
             common_tracks=common_tracks,
             artist_similarity=artist_similarity,
             track_similarity=track_similarity,
-            audio_similarity=audio_similarity,
-            top_genres=top_genres
+            top_genres=top_genres,
+            genre_labels=genre_labels,
+            genre_data=genre_data
         )
     except Exception as e:
         logger.exception(f"Error during comparison between {current_user.username} and user_id {user_id}: {e}")
-        flash("An error occurred while comparing profiles.")
+        flash("An error occurred while comparing profiles. Please try again later.")
         return redirect(url_for('users'))
-
 
 @app.route('/update_privacy', methods=['GET', 'POST'])
 @login_required

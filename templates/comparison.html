@@ -66,12 +66,14 @@
     </div>
 </div>
 
-<!-- Optional: Playlist Creation Button -->
+<!-- Removed the Create Mutual Playlist form to fix the BuildError -->
+<!--
 {% if common_tracks %}
     <form action="{{ url_for('create_playlist', user_id=other_user.id) }}" method="post">
         <button type="submit" class="btn btn-primary mt-3">Create Mutual Playlist</button>
     </form>
 {% endif %}
+-->
 
 <p class="mt-4"><a href="{{ url_for('users') }}" class="btn btn-link">Compare with another user</a></p>
 <p><a href="{{ url_for('dashboard') }}" class="btn btn-link">Back to Dashboard</a></p>

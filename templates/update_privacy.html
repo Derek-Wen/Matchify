@@ -7,9 +7,9 @@
 <h1>Privacy Settings</h1>
 <form method="post">
     {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.share_data.label }}
+    <div class="form-group form-check">
         {{ form.share_data(class="form-check-input") }}
+        {{ form.share_data.label(class="form-check-label") }}
     </div>
     {{ form.submit(class="btn btn-primary") }}
 </form>

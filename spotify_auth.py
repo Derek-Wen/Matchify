@@ -1,5 +1,3 @@
-# spotify_auth.py
-
 from flask import Flask, request, redirect, render_template, url_for, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import (
@@ -23,7 +21,12 @@ app = Flask(__name__)
 
 # Configuration
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your_default_secret_key')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+
+# Update the SQLAlchemy Database URI
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///users.db')
+# Fix for Heroku's DATABASE_URL starting with 'postgres://'
+if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://', 'postgresql://')
 
 # Initialize Extensions
 db = SQLAlchemy(app)
@@ -34,7 +37,7 @@ login_manager.login_view = 'login'
 # Spotify API credentials
 client_id = os.getenv('SPOTIFY_CLIENT_ID')
 client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-redirect_uri = 'http://localhost:5000/callback'
+redirect_uri = os.getenv('REDIRECT_URI', 'http://localhost:5000/callback')
 
 # User Model
 class User(db.Model, UserMixin):

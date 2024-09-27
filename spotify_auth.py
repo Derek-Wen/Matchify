@@ -35,9 +35,9 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 # Spotify API credentials
-client_id = os.getenv('SPOTIFY_CLIENT_ID')
-client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
-redirect_uri = os.getenv('REDIRECT_URI', 'http://localhost:5000/callback')
+client_id = os.getenv('SPOTIFY_CLIENT_ID', '').strip()
+client_secret = os.getenv('SPOTIFY_CLIENT_SECRET', '').strip()
+redirect_uri = os.getenv('REDIRECT_URI', '').strip()
 
 # User Model
 class User(db.Model, UserMixin):

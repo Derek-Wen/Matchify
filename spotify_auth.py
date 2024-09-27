@@ -352,6 +352,30 @@ def compare(user_id):
         genre_labels = [genre for genre, count in top_genres]
         genre_data = [count for genre, count in top_genres]
 
+        # Calculate Audio Feature Similarity (Optional)
+        # Fetch audio features for both users
+        current_user_audio = get_tracks_audio_features(current_user, current_user_tracks)
+        other_user_audio = get_tracks_audio_features(other_user, other_user_tracks)
+
+        # Define the features to consider
+        features = ['danceability', 'energy', 'valence', 'tempo', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
+
+        # Compute average features for each user
+        def average_features(audio_features_list):
+            feature_values = {feature: [] for feature in features}
+            for af in audio_features_list:
+                if af:  # Check if audio feature data is available
+                    for feature in features:
+                        feature_values[feature].append(af.get(feature, 0))
+            avg_features = [np.mean(feature_values[feature]) if feature_values[feature] else 0 for feature in features]
+            return np.array(avg_features).reshape(1, -1)
+
+        current_user_avg_features = average_features(current_user_audio)
+        other_user_avg_features = average_features(other_user_audio)
+
+        # Calculate cosine similarity
+        audio_similarity = cosine_similarity(current_user_avg_features, other_user_avg_features)[0][0] * 100
+
         return render_template(
             'comparison.html',
             other_user=other_user,
@@ -359,6 +383,7 @@ def compare(user_id):
             common_tracks=common_tracks,
             artist_similarity=artist_similarity,
             track_similarity=track_similarity,
+            audio_similarity=audio_similarity,  # Pass audio_similarity
             top_genres=top_genres,
             genre_labels=genre_labels,
             genre_data=genre_data

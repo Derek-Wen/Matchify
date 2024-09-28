@@ -283,9 +283,32 @@ def callback():
 @login_required
 def dashboard():
     try:
-        top_artists = get_user_top_artists(current_user)
-        top_tracks = get_user_top_tracks(current_user)
-        return render_template('dashboard.html', user=current_user, top_artists=top_artists, top_tracks=top_tracks)
+        # Get 'time_range' from query parameters, default to 'medium_term'
+        time_range = request.args.get('time_range', 'medium_term')
+        if time_range not in ['short_term', 'medium_term', 'long_term']:
+            flash('Invalid timeframe selected.')
+            return redirect(url_for('dashboard'))
+
+        # Mapping for readable labels
+        time_range_labels = {
+            'short_term': 'Last 4 Weeks',
+            'medium_term': 'Last 6 Months',
+            'long_term': 'Several Years'
+        }
+        time_range_label = time_range_labels.get(time_range, 'Unknown Timeframe')
+
+        # Fetch top artists and tracks with the selected time_range
+        top_artists = get_user_top_artists(current_user, time_range=time_range, limit=50)
+        top_tracks = get_user_top_tracks(current_user, time_range=time_range, limit=50)
+
+        return render_template(
+            'dashboard.html',
+            user=current_user,
+            top_artists=top_artists,
+            top_tracks=top_tracks,
+            time_range_label=time_range_label,
+            current_time_range=time_range  # Pass current_time_range for template
+        )
     except Exception as e:
         logger.error(f"Error in dashboard for user {current_user.username}: {e}")
         flash("An error occurred while loading the dashboard.")
@@ -313,17 +336,31 @@ def users():
 @login_required
 def compare(user_id):
     try:
+        # Get 'time_range' from query parameters, default to 'medium_term'
+        time_range = request.args.get('time_range', 'medium_term')
+        if time_range not in ['short_term', 'medium_term', 'long_term']:
+            flash('Invalid timeframe selected.')
+            return redirect(url_for('users'))
+
+        # Mapping for readable labels
+        time_range_labels = {
+            'short_term': 'Last 4 Weeks',
+            'medium_term': 'Last 6 Months',
+            'long_term': 'Several Years'
+        }
+        time_range_label = time_range_labels.get(time_range, 'Unknown Timeframe')
+
         other_user = User.query.get_or_404(user_id)
         if not other_user.share_data:
             flash('The user has disabled data sharing.')
             return redirect(url_for('users'))
 
-        # Fetch top tracks and artists for both users
-        current_user_tracks = get_user_top_tracks(current_user, limit=50)
-        other_user_tracks = get_user_top_tracks(other_user, limit=50)
+        # Fetch top tracks and artists for both users with the selected time_range
+        current_user_tracks = get_user_top_tracks(current_user, time_range=time_range, limit=50)
+        other_user_tracks = get_user_top_tracks(other_user, time_range=time_range, limit=50)
 
-        current_user_artists = get_user_top_artists(current_user, limit=50)
-        other_user_artists = get_user_top_artists(other_user, limit=50)
+        current_user_artists = get_user_top_artists(current_user, time_range=time_range, limit=50)
+        other_user_artists = get_user_top_artists(other_user, time_range=time_range, limit=50)
 
         # Find common tracks
         current_user_track_ids = {track['id'] for track in current_user_tracks}
@@ -386,7 +423,8 @@ def compare(user_id):
             audio_similarity=audio_similarity,  # Pass audio_similarity
             top_genres=top_genres,
             genre_labels=genre_labels,
-            genre_data=genre_data
+            genre_data=genre_data,
+            time_range_label=time_range_label  # Pass readable label
         )
     except Exception as e:
         logger.exception(f"Error during comparison between {current_user.username} and user_id {user_id}: {e}")

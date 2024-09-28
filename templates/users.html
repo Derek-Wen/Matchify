@@ -5,6 +5,17 @@
 
 {% block content %}
 <h1>Select a User to Compare With</h1>
+
+<!-- Time Range Selection -->
+<div class="mb-4">
+    <label for="timeRange">Select Timeframe for Comparison:</label>
+    <select id="timeRange" class="form-control w-50">
+        <option value="short_term">Last 4 Weeks</option>
+        <option value="medium_term" selected>Last 6 Months</option>
+        <option value="long_term">Several Years</option>
+    </select>
+</div>
+
 {% if users %}
 <ul class="list-group">
     {% for user in users %}
@@ -13,7 +24,8 @@
         <img src="{{ user.profile_image }}" alt="{{ user.username }}" width="50" class="mr-3">
         {% endif %}
         <span>{{ user.username }}</span>
-        <a href="{{ url_for('compare', user_id=user.id) }}" class="btn btn-primary ml-auto">Compare</a>
+        <!-- Compare Button -->
+        <a href="{{ url_for('compare', user_id=user.id, time_range='medium_term') }}" class="btn btn-primary ml-auto compare-button">Compare</a>
     </li>
     {% endfor %}
 </ul>
@@ -21,4 +33,28 @@
 <p>No other users available for comparison.</p>
 {% endif %}
 <p><a href="{{ url_for('dashboard') }}" class="btn btn-link">Back to Dashboard</a></p>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timeRangeSelect = document.getElementById('timeRange');
+        const compareButtons = document.querySelectorAll('.compare-button');
+        
+        function updateCompareLinks() {
+            const selectedTimeRange = timeRangeSelect.value;
+            compareButtons.forEach(button => {
+                const userId = button.getAttribute('href').split('/').pop().split('?')[0];
+                button.setAttribute('href', `{{ url_for('compare', user_id='') }}${userId}?time_range=${selectedTimeRange}`);
+            });
+        }
+        
+        // Initial update
+        updateCompareLinks();
+        
+        // Update links when time range changes
+        timeRangeSelect.addEventListener('change', updateCompareLinks);
+    });
+</script>
 {% endblock %}

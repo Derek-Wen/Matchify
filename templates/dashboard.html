@@ -14,7 +14,17 @@
     <a href="{{ url_for('update_privacy') }}" class="btn btn-secondary">Privacy Settings</a>
 </p>
 
-<h2>Your Top Artists</h2>
+<!-- Time Range Selection -->
+<div class="mb-4">
+    <label for="timeRange">Select Timeframe for Your Top Artists and Tracks:</label>
+    <select id="timeRange" class="form-control w-50">
+        <option value="short_term">Last 4 Weeks</option>
+        <option value="medium_term" selected>Last 6 Months</option>
+        <option value="long_term">Several Years</option>
+    </select>
+</div>
+
+<h2>Your Top Artists ({{ time_range_label }})</h2>
 {% if top_artists %}
 <div class="row">
     {% for artist in top_artists %}
@@ -34,7 +44,7 @@
 <p>You have no top artists to display.</p>
 {% endif %}
 
-<h2>Your Top Tracks</h2>
+<h2>Your Top Tracks ({{ time_range_label }})</h2>
 {% if top_tracks %}
 <div class="row">
     {% for track in top_tracks %}
@@ -55,4 +65,27 @@
 <p>You have no top tracks to display.</p>
 {% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timeRangeSelect = document.getElementById('timeRange');
+        
+        function updateDashboard() {
+            const selectedTimeRange = timeRangeSelect.value;
+            // Reload the dashboard with the selected time_range as a query parameter
+            window.location.href = `{{ url_for('dashboard') }}?time_range=${selectedTimeRange}`;
+        }
+        
+        // Set the selected value based on query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentTimeRange = urlParams.get('time_range') || 'medium_term';
+        timeRangeSelect.value = currentTimeRange;
+        
+        // Update the dashboard when the selection changes
+        timeRangeSelect.addEventListener('change', updateDashboard);
+    });
+</script>
 {% endblock %}

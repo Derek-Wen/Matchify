@@ -56,6 +56,9 @@ client_id = os.getenv('SPOTIFY_CLIENT_ID', '').strip()
 client_secret = os.getenv('SPOTIFY_CLIENT_SECRET', '').strip()
 redirect_uri = os.getenv('REDIRECT_URI', 'http://127.0.0.1:5000/callback').strip()
 
+# Define the limit for Top Artists and Top Tracks
+TOP_ITEMS_LIMIT = 16
+
 # User Model
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -85,10 +88,12 @@ def refresh_access_token(user):
     }
     client_creds = f"{client_id}:{client_secret}"
     client_creds_b64 = base64.b64encode(client_creds.encode())
+
     headers = {
         'Authorization': f'Basic {client_creds_b64.decode()}',
         'Content-Type': 'application/x-www-form-urlencoded'
     }
+
     response = requests.post(token_url, data=payload, headers=headers)
     response_data = response.json()
     if 'access_token' in response_data:
@@ -100,7 +105,7 @@ def refresh_access_token(user):
         logger.error(f"Failed to refresh access token for user {user.username}: {response_data}")
         return False
 
-def get_user_top_artists(user, time_range='medium_term', limit=50):
+def get_user_top_artists(user, time_range='medium_term', limit=TOP_ITEMS_LIMIT):
     headers = {
         'Authorization': f'Bearer {user.access_token}'
     }
@@ -121,7 +126,7 @@ def get_user_top_artists(user, time_range='medium_term', limit=50):
         logger.error(f"Error fetching top artists for user {user.username}: {response.status_code} {response.text}")
         return []
 
-def get_user_top_tracks(user, time_range='medium_term', limit=50):
+def get_user_top_tracks(user, time_range='medium_term', limit=TOP_ITEMS_LIMIT):
     headers = {
         'Authorization': f'Bearer {user.access_token}'
     }
@@ -298,8 +303,8 @@ def dashboard():
         time_range_label = time_range_labels.get(time_range, 'Unknown Timeframe')
 
         # Fetch top artists and tracks with the selected time_range
-        top_artists = get_user_top_artists(current_user, time_range=time_range, limit=50)
-        top_tracks = get_user_top_tracks(current_user, time_range=time_range, limit=50)
+        top_artists = get_user_top_artists(current_user, time_range=time_range)
+        top_tracks = get_user_top_tracks(current_user, time_range=time_range)
 
         return render_template(
             'dashboard.html',
@@ -336,8 +341,10 @@ def users():
 @login_required
 def compare(user_id):
     try:
-        # Get 'time_range' from query parameters, default to 'medium_term'
+        # Log the received user_id and time_range
         time_range = request.args.get('time_range', 'medium_term')
+        logger.info(f"Comparing with user_id: {user_id} for time_range: {time_range}")
+
         if time_range not in ['short_term', 'medium_term', 'long_term']:
             flash('Invalid timeframe selected.')
             return redirect(url_for('users'))
@@ -356,11 +363,11 @@ def compare(user_id):
             return redirect(url_for('users'))
 
         # Fetch top tracks and artists for both users with the selected time_range
-        current_user_tracks = get_user_top_tracks(current_user, time_range=time_range, limit=50)
-        other_user_tracks = get_user_top_tracks(other_user, time_range=time_range, limit=50)
+        current_user_tracks = get_user_top_tracks(current_user, time_range=time_range)
+        other_user_tracks = get_user_top_tracks(other_user, time_range=time_range)
 
-        current_user_artists = get_user_top_artists(current_user, time_range=time_range, limit=50)
-        other_user_artists = get_user_top_artists(other_user, time_range=time_range, limit=50)
+        current_user_artists = get_user_top_artists(current_user, time_range=time_range)
+        other_user_artists = get_user_top_artists(other_user, time_range=time_range)
 
         # Find common tracks
         current_user_track_ids = {track['id'] for track in current_user_tracks}

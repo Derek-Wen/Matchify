@@ -57,7 +57,7 @@ client_secret = os.getenv('SPOTIFY_CLIENT_SECRET', '').strip()
 redirect_uri = os.getenv('REDIRECT_URI', 'http://127.0.0.1:5000/callback').strip()
 
 # Define the limit for Top Artists and Top Tracks
-TOP_ITEMS_LIMIT = 48
+TOP_ITEMS_LIMIT = 50
 
 # User Model
 class User(db.Model, UserMixin):

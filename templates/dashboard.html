@@ -19,8 +19,8 @@
     <label for="timeRange">Select Timeframe for Your Top Artists and Tracks:</label>
     <select id="timeRange" class="form-control w-50">
         <option value="short_term">Last 4 Weeks</option>
-        <option value="medium_term" selected>Last 6 Months</option>
-        <option value="long_term">Several Years</option>
+        <option value="medium_term" {% if current_time_range == 'medium_term' %}selected{% endif %}>Last 6 Months</option>
+        <option value="long_term" {% if current_time_range == 'long_term' %}selected{% endif %}>Several Years</option>
     </select>
 </div>
 
@@ -78,11 +78,6 @@
             // Reload the dashboard with the selected time_range as a query parameter
             window.location.href = `{{ url_for('dashboard') }}?time_range=${selectedTimeRange}`;
         }
-        
-        // Set the selected value based on query parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        const currentTimeRange = urlParams.get('time_range') || 'medium_term';
-        timeRangeSelect.value = currentTimeRange;
         
         // Update the dashboard when the selection changes
         timeRangeSelect.addEventListener('change', updateDashboard);

@@ -1,6 +1,6 @@
 # Matchify
 
-**Matchify** is a web application that leverages the Spotify API to allow users to visualize and compare their top artists and tracks. Users can log in with their Spotify accounts, view their personal music preferences, and compare them with other users in the Matchify community. The application emphasizes user privacy, enabling users to control whether their data can be shared for comparisons.
+**Matchify** is a web application that leverages the Spotify API to allow users to visualize and compare their top artists and tracks. Users can log in with their Spotify accounts, view their personal music preferences, and compare them with other users. The application emphasizes user privacy, enabling users to control whether their data can be shared for comparisons.
 
 ## Table of Contents
 

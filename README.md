@@ -7,13 +7,6 @@
 - [Features](#features)
 - [Demo](#demo)
 - [Technologies Used](#technologies-used)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Usage](#usage)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
-- [License](#license)
 - [Contact](#contact)
 
 ---
@@ -27,6 +20,11 @@
 - **Responsive Design:** Accessible and visually appealing on various devices and screen sizes.
 - **Custom Domain Support:** Professional appearance with the option to use a custom domain.
 - **Secure Data Handling:** Implements best practices for security, including HTTPS enforcement and secure session management.
+
+---
+
+## Demo
+[Matchify](https://matchify-b1a89524dd48.herokuapp.com/)
 
 ---
 
@@ -59,7 +57,8 @@
 
 ---
 
-- **Contact**
+## Contact
+
   - Derek Wen
   - Email: derek.hz.wen@gmail.com
   - GitHub: @Derek-Wen

@@ -18,7 +18,7 @@
 <div class="mb-4">
     <label for="timeRange">Select Timeframe for Your Top Artists and Tracks:</label>
     <select id="timeRange" class="form-control w-50">
-        <option value="short_term">Last 4 Weeks</option>
+        <option value="short_term" {% if current_time_range == 'short_term' %}selected{% endif %}>Last 4 Weeks</option>
         <option value="medium_term" {% if current_time_range == 'medium_term' %}selected{% endif %}>Last 6 Months</option>
         <option value="long_term" {% if current_time_range == 'long_term' %}selected{% endif %}>Several Years</option>
     </select>

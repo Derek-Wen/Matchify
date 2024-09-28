@@ -25,7 +25,7 @@
         {% endif %}
         <span>{{ user.username }}</span>
         <!-- Compare Button with data-user-id -->
-        <a href="{{ url_for('compare', user_id=user.id, time_range='medium_term') }}" class="btn btn-primary ml-auto compare-button" data-user-id="{{ user.id }}">Compare</a>
+        <button class="btn btn-primary ml-auto compare-button" data-user-id="{{ user.id }}">Compare</button>
     </li>
     {% endfor %}
 </ul>
@@ -42,21 +42,23 @@
         const timeRangeSelect = document.getElementById('timeRange');
         const compareButtons = document.querySelectorAll('.compare-button');
         
-        function updateCompareLinks() {
-            const selectedTimeRange = timeRangeSelect.value;
-            compareButtons.forEach(button => {
-                const userId = button.getAttribute('data-user-id');
-                // Construct the new href with user_id and selected time_range
-                const newHref = "{{ url_for('compare', user_id='USER_ID') }}".replace('USER_ID', userId) + `?time_range=${selectedTimeRange}`;
-                button.setAttribute('href', newHref);
-            });
+        function getTimeRange() {
+            return timeRangeSelect.value;
         }
         
-        // Initial update
-        updateCompareLinks();
+        function handleCompareClick(event) {
+            const userId = event.target.getAttribute('data-user-id');
+            const selectedTimeRange = getTimeRange();
+            // Construct the URL
+            const compareUrl = `/compare/${userId}?time_range=${selectedTimeRange}`;
+            // Redirect to the compare page
+            window.location.href = compareUrl;
+        }
         
-        // Update links when time range changes
-        timeRangeSelect.addEventListener('change', updateCompareLinks);
+        // Attach event listeners to all compare buttons
+        compareButtons.forEach(button => {
+            button.addEventListener('click', handleCompareClick);
+        });
     });
 </script>
 {% endblock %}
